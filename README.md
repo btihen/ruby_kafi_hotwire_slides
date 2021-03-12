@@ -1,3 +1,17 @@
+# usage
+
+Clone the reveal.js repository
+$ git clone https://github.com/hakimel/reveal.js.git
+Move to the reveal.js folder and install dependencies
+$ cd reveal.js && npm install
+Serve the presentation and monitor source files for changes
+$ npm start
+Open http://localhost:8000 to view your presentation
+Development Server Port
+The development server defaults to port 8000. You can use the the port argument to switch to a different one:
+
+npm start -- --port=8001
+
 <p align="center">
   <a href="https://revealjs.com">
   <img src="https://hakim-static.s3.amazonaws.com/reveal-js/logo/v1/reveal-black-text.svg" alt="reveal.js" width="450">
