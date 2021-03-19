@@ -74,14 +74,16 @@
 					<h2>Path</h2>
 					<section>
 						<h3>Starting (tweet) App</h3>
-						<p>heroku url</p>
-						This code can be found at: https://github.com/btihen/tweet_simulator_rails
+						<p>
+							Demo: heroku url<br>
+					  	Code: https://github.com/btihen/tweet_simulator_rails
+						</p>
 					</section>
 
 					<section>
 						<h3>Finished Hotwire App</h3>
-						<p>heroku url</p>
-						This code can be found at: https://github.com/btihen/tweets_hotwire
+						<p>Demo: https://hottweets.herokuapp.com/</p>
+						<p>Code: https://github.com/btihen/tweets_hotwire</p>
 					</section>
 
 					<section>
@@ -132,6 +134,16 @@
 						</code></pre>
 					</section>
 					<section>
+						<p><small>To visualize the turbo-frames lets add CSS to highlight turbo-frames</small></p>
+						<pre><code data-trim data-noescape>
+							# app/assets/stylesheets/tweets.scss
+							turbo-frame {
+							  display: block;
+							  border: 2px solid green
+							}
+						</code></pre>
+					</section>
+					<section>
 						https://github.com/btihen/tweets_hotwire/commit/a09bcdab0d6509b73cb0e7b7fa0bf13611c173ff
 					</section>
 				</section>
@@ -163,7 +175,7 @@
 						<%# connects to the backend broadcast (via a channel) %>
 						<%= turbo_stream_from "tweets" %>
 
-						<%# add frame to receive to taged data %>
+						<%# add frame to receive to tagged data %>
 						<%= turbo_frame_tag "tweets" do %>
 						  <%= render @tweets %>
 						<% end %>
@@ -288,7 +300,7 @@
 					<h2>5. Real-time Edits</h2>
 					<section>
 						<h3>edit broadcast in Model</h3>
-						<p><small>Lets start with the broadcast update afterhook</small></p>
+						<p><small>Lets start with the broadcast update after-hook</small></p>
 						<pre><code data-trim data-noescape>
 						# app/models/tweet.rb
 						class Tweet < ApplicationRecord
@@ -301,7 +313,12 @@
 						</code></pre>
 					</section>
 					<section>
-						<p><small>In-order for the edit form to replace the tweet html - we need to give the edit form the dame dom_id</small></p>
+						<p>
+							<small>
+							In-order for the edit form to replace the tweet html <br>
+							we need to give the edit form the same dom_id
+						</small>
+						</p>
 						<pre><code data-trim data-noescape>
 						# app/views/tweets/edit.html.erb
 						&lt;h1>Editing Tweet&lt;/h1>
@@ -317,7 +334,7 @@
 						<p><small>
 							using the cancel button while editing - looses the tweet<br>
 							its actually rendering the show page when we hit cancel,<br>
-							but does't have a dom_id to know where to put the html
+							but doesn't have a dom_id to know where to put the html
 						</small></p>
 						<pre><code data-trim data-noescape>
 						# app/views/tweets/show.html.erb
@@ -336,18 +353,26 @@
 				<section>
 					<h2>Hotwire-Rails Wrap-up</h2>
 					<section>
-						Non-standard routes / actions are tricky
-						<br>
-						<small>(Like & Retweet - never figured out how to broadcast)</small>
-						<br>
-						<br>
-						Silent failures are annoying<br>
-						<small>(when the contoller finds something to render - but not where!)</small>
+						<h3>Current Drawbacks</h3>
+						<p>
+							Non-standard routes / actions are tricky
+							<br>
+							<small>(Like & Retweet - never figured out how to broadcast)</small>
+							<br>
+							<br>
+							Silent failures are annoying<br>
+							<small>(when the controller finds something to render - but not where!)</small>
+						</p>
 					</section>
 					<section>
-						A Rails SPA without JavaScript is now possible
-						<br><br>
-						Planned arrival is Rails 7.0
+						<h3>Benefits</h3>
+						<p>
+							Hotwire - encourages / requires `view` modularization
+							<br><br>
+							A Rails SPA without JavaScript is now possible
+							<br><br>
+							Planned arrival is Rails 7.0
+						</p>
 					</section>
 				</section>
 
