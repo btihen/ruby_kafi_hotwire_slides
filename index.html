@@ -22,7 +22,7 @@
 					<br>
 					<small>
 						<ul>
-							<li>replaces Turbo-Links</li>
+							<li>Replaces Turbo-Links</li>
 							<li>Sends/replaces HTML snippets</li>
 							<li>Turbo now forms and broadcasts</li>
 							<li>StimulusJS - for advanced needs</li>
@@ -48,12 +48,12 @@
 				<section>
 					<h3>Standard App</h3>
 					<pre><code data-trim data-noescape>
-						$ rails new tweets -d postgresql -T --skip-turbolinks --skip-spring
+						$ rails new tweets -d postgresql -T --skip-turbolinks
 						$ cd tweets
-						$ bin/rails g scaffold tweet body:text likes:integer retweets:integer
+						$ bin/rails g scaffold tweet body:text likes:integer
 						# app/models/tweet.rb
 						class Tweet < ApplicationRecord
-							validates :body, presence: true
+						  validates :body, presence: true
 						end
 					</code></pre>
 				</section>
@@ -63,7 +63,8 @@
 					<img src="./images/Tweets_w_Frames.png" height="400px">
 					<small>
 						<ul>
-							<li>Code: https://github.com/btihen/tweets_hotwire</li>
+							<li><b>Code:</b> https://github.com/btihen/tweets_hotwire</li>
+							<li><b>Talk:</b> https://github.com/btihen/ruby_kafi_hotwire_slides</li>
 						</ul>
 					</small>
 				</section>
@@ -304,15 +305,18 @@
 						<small><p>
 							<b>Benefits</b></p>
 							<ul>
-								<li>Powerful & flexible</li>
+								<li>Easy install</li>
+								<li>Easy legacy upgrade</li>
+								<li>Powerful and flexible</li>
 								<li>Encourages good partials</li>
 								<li>A Real-Time Rails SPA with Rails Mindset</li>
 							</ul>
 							<br>
 							<p><b>Drawbacks</b></p>
 							<ul>
-								<li>Non-standard routes / actions are tricky</li>
+								<li>Non-standard routes/actions are tricky</li>
 								<li>Silent failures are COMMON and tricky</li>
+								<li>https://github.com/beflagrant/hotwire-debug</li>
 							</ul>
 						</small>
 					</section>
