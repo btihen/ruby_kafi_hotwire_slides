@@ -17,186 +17,154 @@
 		<div class="reveal">
 			<div class="slides">
 				<section>
-					<img
-						src="https://btihen.me/post_ruby_rails/rails_tweet_single_page_hotwire/featured_hu3e170c5491bb8789d6da17280d9e859c_408203_720x0_resize_lanczos_2.png">
+					<h3>https://hotwire.dev/</h3>
+					<img src="./images/Hotwire_Rails.png" height="400px">
 					<br>
-					https://hotwire.dev/
-				</section>
-
-				<section>
-					<h2>Overview</h2>
-					<section>
-						<h3>Rails 6.1+</h3>
-						<ul>
-							<li>Single-Page</li>
-							<li>Real-time Clients<br></li>
-							<li>Minimal JavaScript<br></li>
-						</ul>
-						<p>
-							USES:
-							<small>replaces Turbo-Links</small><br>
-							<small>Handles links, forms and broadcasts</small><br>
-							<small>sends/replaces small HTML snippets via sockets</small><br>
-						</p>
-					</section>
-
-					<section>
-						<h3>Tech</h3>
+					<small>
 						<ul>
 							<li>replaces Turbo-Links</li>
-							<li>Turbo now handles links, forms and broadcasts</li>
-							<li>Sends/replaces HTML snippets via sockets to DOM</li>
-							<li>StimulusJS - for all more advanced needs</li>
+							<li>Sends/replaces HTML snippets</li>
+							<li>Turbo now forms and broadcasts</li>
+							<li>StimulusJS - for advanced needs</li>
 						</ul>
-					</section>
+					</small>
+				</section>
 
+				<section>
+					<h3>Rails 7.0 Default</h3>
 					<section>
-						<h3>Benefits</h3>
-						<ul>
-							<li>Fast / Responsive</li>
-							<li>Rails 7.0 component</li>
-							<li>Minimal code changes needed</li>
-							<li>Integration between Frontend and Backend</li>
-						</ul>
-					</section>
-
-					<section>
-						<h3>Drawbacks</h3>
-						<ul>
-							<li>Fails Silently!<br><small>(difficult debugging)</small></li>
-							<li>Tight coupling w/ defaults<br><small>(probably API is not yet complete)</small></li>
-							<li>More context to keep in mind<br><small>(actions, models, channels, frames & DOM IDs)</small></li>
-						</ul>
+						<img src="./images/Modern_FE_Rails.jpg" height="400px">
+						<br>
+						<small>
+							<ul>
+								<li>Rails 6.x+</li>
+								<li>Minimal JavaScript</li>
+								<li>Single-Page -- Real-time</li>
+							</ul>
+						</small>
 					</section>
 				</section>
 
 				<section>
-					<h2>Path</h2>
-					<section>
-						<h3>Starting (tweet) App</h3>
-						<p>
-							Demo: heroku url<br>
-					  	Code: https://github.com/btihen/tweet_simulator_rails
-						</p>
-					</section>
-
-					<section>
-						<h3>Finished Hotwire App</h3>
-						<p>Demo: https://hottweets.herokuapp.com/</p>
-						<p>Code: https://github.com/btihen/tweets_hotwire</p>
-					</section>
-
-					<section>
-						<h3>Steps to Transform</h3>
-						<ol>
-							<li>Install / Config: hotwire-rails</li>
-							<li>Broadcast: creates</li>
-							<li>Broadcast: deletes</li>
-							<li>Turbo Forms</li>
-							<li>Broadcast: edits</li>
-						</ol>
-					</section>
+					<h3>Standard App</h3>
+					<pre><code data-trim data-noescape>
+						$ rails new tweets -d postgresql -T --skip-turbolinks --skip-spring
+						$ cd tweets
+						$ bin/rails g scaffold tweet body:text likes:integer retweets:integer
+						# app/models/tweet.rb
+						class Tweet < ApplicationRecord
+							validates :body, presence: true
+						end
+					</code></pre>
 				</section>
 
 				<section>
-					<h2>1. Install Config Hotwire</h2>
-					<section>
+					<h3>SPA Hotwire App</h3>
+					<img src="./images/Tweets_w_Frames.png" height="400px">
+					<small>
+						<ul>
+							<li>Code: https://github.com/btihen/tweets_hotwire</li>
+						</ul>
+					</small>
+				</section>
+
+				<section>
+					<h3>Steps to Transform</h3>
+					<ol>
+						<li>Install Hotwire-rails</li>
+						<li>Check Config</li>
+						<li>Broadcast: creates</li>
+						<li>Broadcast: deletes</li>
+						<li>Turbo Forms</li>
+						<li>Broadcast: edits</li>
+					</ol>
+				</section>
+
+				<section>
+					<h3>1. Install Hotwire</h3>
+					<small>
 						<h3>Requirements</h3>
 						<p>Redis installed and running on host system</p>
-					</section>
-					<section>
-						<h3>Install</h3>
-						<pre><code data-trim data-noescape>
-							bundle add hotwire-rails
-							bin/rails hotwire:install
-						</code></pre>
-					</section>
-					<section>
-						<h3>Configure</h3>
-						<ul>
-							<li>Turbo is installed</li>
-							<li>Stimulus is installed</li>
-							<li>Redis enabled in Gemfile</li>
-							<li>References to Turbo-Links must be removed!</li>
-						</ul>
-						<p><small>Should auto-configure -- but I had to make a few adjustments to: `app/views/layouts/application.html.erb`</small></p>
-					</section>
-					<section>
-						<h3>Adjustments</h3>
-						<p>Ensure you see the following (in the header section):</p>
+					</small>
+					<pre><code data-trim data-noescape>
+						$ bundle add hotwire-rails
+						$ bin/rails hotwire:install
+					</code></pre>
+				</section>
+
+				<section>
+					<h3>2. Check Hotwire Config</h3>
+						<small>
+							<p>https://github.com/btihen/tweets_hotwire/commit/a09bcdab0d6509b73cb0e7b7fa0bf13611c173ff</p>
+						</small>
 						<pre><code data-trim data-noescape>
 							# app/views/layouts/application.html.erb
 							<%= stylesheet_link_tag 'application' , media: 'all' %>
 							<%= javascript_pack_tag 'application' %>
 							<%= yield :head %>
 							<%= turbo_include_tags %>
-							<%# stimulus_include_tags %>
 						</code></pre>
+						<small>
+						<p>Check Header section of application.html.erb</p>
+						<ul>
+							<li>Turbo Added</li>
+							<li>Turbo-Links Removed</li>
+						</ul>
+					</small>
+				</section>
+
+
+				<section>
+					<h3>3. Real-Time Broadcast - Create</h3>
+					<small>
+						<p>
+							https://github.com/btihen/tweets_hotwire/commit/42e68b8d886cda3e55d9d0daad5c033c5e9cb89e
+						</p>
+					</small>
+					<section>
+							<pre><code data-trim data-noescape>
+							# app/models/tweet.rb
+							class Tweet < ApplicationRecord
+							  validates :body, presence: true
+
+							  after_create_commit { broadcast_prepend_to "tweets" }
+							end
+							</code></pre>
+							<small>
+							<p>
+								this creates and connects model to a "tweets" stream / channel
+								<ul>
+									<li>use `broadcast_prepend_to` to send items to the top</li>
+									<li>use `broadcast_append_to` to send items to the bottom</li>
+								</ul>
+							</p>
+							</small>
 					</section>
 					<section>
-						<p><small>To visualize the turbo-frames lets add CSS to highlight turbo-frames</small></p>
-						<pre><code data-trim data-noescape>
-							# app/assets/stylesheets/tweets.scss
-							turbo-frame {
-							  display: block;
-							  border: 2px solid green
-							}
-						</code></pre>
-					</section>
-					<section>
-						https://github.com/btihen/tweets_hotwire/commit/a09bcdab0d6509b73cb0e7b7fa0bf13611c173ff
+							<pre><code data-trim data-noescape>
+							# app/views/tweets/index.html.erb
+							<%= turbo_stream_from "tweets" %>
+
+							<%= turbo_frame_tag "tweets" do %>
+							  <%= render @tweets %>
+							<% end %>
+							</code></pre>
+							<small>
+								<p>
+								this connects newly created tweets to the "tweets" `stream`
+							<ul>
+								<li>`turbo_stream_from` connects the view to the data stream</li>
+								<li>`turbo_frame_tag` creates a location to put stream data</li>
+							</ul>
+							</p>
+						</small>
 					</section>
 				</section>
 
 				<section>
-					<h2>2. Real-time create</h2>
+					<h3>4. Real-Time Broadcast - Delete</h3>
+					<small>https://github.com/btihen/tweets_hotwire/commit/c40a66d7f949f3a280566bb3369a1168b1e0721e</small>
 					<section>
-						<h3>create broadcast in model</h3>
-						<pre><code data-trim data-noescape>
-						# app/models/tweet.rb
-						class Tweet < ApplicationRecord
-						  validates :body, presence: true
-
-						  after_create_commit { broadcast_prepend_to "tweets" }
-						end
-						</code></pre>
-						<p><small>
-							this connects newly created tweets to the "tweets" `stream`
-							<ul>
-								<li>use `broadcast_prepend_to` to put new items at the top</li>
-								<li>use `broadcast_append_to` to put new items at the bottom</li>
-							</ul>
-						</small></p>
-					</section>
-					<section>
-						<h3>Add the stream to the view</h3>
-						<pre><code data-trim data-noescape>
-						# app/views/tweets/index.html.erb
-						<%# connects to the backend broadcast (via a channel) %>
-						<%= turbo_stream_from "tweets" %>
-
-						<%# add frame to receive to tagged data %>
-						<%= turbo_frame_tag "tweets" do %>
-						  <%= render @tweets %>
-						<% end %>
-						</code></pre>
-						<p><small>
-							this connects newly created tweets to the "tweets" `stream`
-							<ul>
-								<li>use `broadcast_prepend_to` to put new items at the top</li>
-								<li>use `broadcast_append_to` to put new items at the bottom</li>
-							</ul>
-						</small></p>
-					</section>
-					<section>
-					https://github.com/btihen/tweets_hotwire/commit/42e68b8d886cda3e55d9d0daad5c033c5e9cb89e
-					</section>
-				</section>
-
-				<section>
-					<h2>3. Real-time delete</h2>
-					<section>
-						<h3>delete broadcast in Model</h3>
 						<pre><code data-trim data-noescape>
 						# app/models/tweet.rb
 						class Tweet < ApplicationRecord
@@ -206,10 +174,10 @@
 						  after_destroy_commit { broadcast_remove_to "tweets" }
 						end
 						</code></pre>
+						<small><p>Enable broadcasting Delete</p></small>
 					</section>
 					<section>
-						<h3>add frame-tag to view</h3>
-						<p><small>around each tweet displayed we need to add a frame with an id - using the tweet</small></p>
+						<small><p>Each tweet displayed needs its own frame</p></small>
 						<pre><code data-trim data-noescape>
 						# app/views/tweets/_tweet.html.erb
 						<%= turbo_frame_tag tweet do %>
@@ -217,19 +185,14 @@
 						  <%= render "actions", locals: {tweet: tweet} %>
 						<% end %>
 						</code></pre>
-						<p><small>in this way turbo can find and remove the exact tweet html</small></p>
-					</section>
-					<section>
-						https://github.com/btihen/tweets_hotwire/commit/c40a66d7f949f3a280566bb3369a1168b1e0721e
+						<small><p>in this way turbo can find and remove the exact tweet HTML</p></small>
 					</section>
 				</section>
 
 				<section>
-					<h2>4. Setup Turbo with Forms</h2>
+					<h3>5. Setup Turbo Forms</h3>
+					<small><p>https://github.com/btihen/tweets_hotwire/commit/11f7131542c8011ae40ae7a02ed3704ea129930c</p></small>
 					<section>
-						<p><small>
-							Turbo now also works with forms (unlike Turbo-Links), but is a bit more complex.
-						</small></p>
 						<pre><code data-trim data-noescape>
 						# app/views/tweets/index.html.erb
 						<%= turbo_stream_from "tweets" %>
@@ -244,40 +207,34 @@
 						  <%= render @tweets %>
 						<% end %>
 						</code></pre>
-						<p><small>
-							We do this by wrapping the form in turbo_frame_tag "tweet-form"
-						</small></p>
 					</section>
 					<section>
-						<p><small>
-							Now, however, if we try to create an invalid tweet; we get no validation errors!
-						</small></p>
 						<pre><code data-trim data-noescape>
 						# app/controllers/tweets_controller.rb
 						def create
 						  @tweet = Tweet.new(tweet_params)
 						  respond_to do |format|
 						    if @tweet.save
-						      format.html { redirect_to tweets_url,
-								    notice: "Tweet was successfully created." }
+						      format.html { render tweet }
 						    else
-						      format.turbo_stream { render
-								    turbo_stream: turbo_stream.replace(@tweet, partial: "tweets/form",
-								    locals: { tweet: @tweet}) }
-						      @tweets = Tweet.all.order(created_at: :desc)
-						      format.html { render :index, status: :unprocessable_entity }
+						      format.turbo_stream {
+						        render turbo_stream: turbo_stream.replace(
+						                @tweet, partial: "tweets/form",
+						                locals: { tweet: @tweet}) }
+						      format.html { render :new }
 						    end
 						  end
 						end
 						</code></pre>
-						<p><small>
-							We need to add `format.turbo_stream` to the not saved case as this is a non-standard action.
-						</small></p>
+						<small>
+							<p>To get validation errors add `format.turbo_stream` to override standard action<br>
+								(unlike happy path `create` -- where Turbo knows what to do)</p>
+						</small>
 					</section>
 					<section>
-						<p><small>
-							Currently, if we can't find the exact id match - so we need to add an id to the form:
-						</small></p>
+						<small><p>
+							Form now also needs a DOM-ID added
+						</p></small>
 						<pre><code data-trim data-noescape>
 						<%= form_with(model: tweet, id: dom_id(tweet)) do |form| %>
 						  &lt;div class="field">
@@ -288,19 +245,18 @@
 						  &lt;/div>
 						<% end %>
 						</code></pre>
-					</section>
-					<section>
-						Now the form is fully turbo-functional!
-						<br>
-						https://github.com/btihen/tweets_hotwire/commit/11f7131542c8011ae40ae7a02ed3704ea129930c
+						<small>
+							<p>
+								Tweet form now fully works with Turbo!
+							</p>
+						</small>
 					</section>
 				</section>
 
 				<section>
-					<h2>5. Real-time Edits</h2>
+					<h3>6. Real-Time Broadcast - Edits</h3>
+					<small><p>https://github.com/btihen/tweets_hotwire/commit/e16f3c525f93e41130d40cf80932a1e6eaac9ea3</p></small>
 					<section>
-						<h3>edit broadcast in Model</h3>
-						<p><small>Lets start with the broadcast update after-hook</small></p>
 						<pre><code data-trim data-noescape>
 						# app/models/tweet.rb
 						class Tweet < ApplicationRecord
@@ -313,12 +269,6 @@
 						</code></pre>
 					</section>
 					<section>
-						<p>
-							<small>
-							In-order for the edit form to replace the tweet html <br>
-							we need to give the edit form the same dom_id
-						</small>
-						</p>
 						<pre><code data-trim data-noescape>
 						# app/views/tweets/edit.html.erb
 						&lt;h1>Editing Tweet&lt;/h1>
@@ -329,50 +279,42 @@
 						&lt;/div>
 						<% end %>
 						</code></pre>
+						<small><p>
+							In-order for Turbo to know how to replace the `show` view with<br>
+							the `edit` view -- add a `frame` with a dom_id to the edit view
+						</p></small>
 					</section>
 					<section>
-						<p><small>
-							using the cancel button while editing - looses the tweet<br>
-							its actually rendering the show page when we hit cancel,<br>
-							but doesn't have a dom_id to know where to put the html
-						</small></p>
 						<pre><code data-trim data-noescape>
 						# app/views/tweets/show.html.erb
 						<%= turbo_frame_tag dom_id(@tweet) do %>
 						  <%= render @tweet %>
 						<% end %>
-						</code></pre><p><small>
-							now inline edit and broadcasts should work well!
-						</small></p>
-					</section>
-					<section>
-						https://github.com/btihen/tweets_hotwire/commit/e16f3c525f93e41130d40cf80932a1e6eaac9ea3
+						</code></pre>
+						<small>
+							<p>CAUTION - without the show dom_id the Turbo sends the HTML<br>
+								doesn't find where to put the HTML and fails silently!</p>
+						</small>
 					</section>
 				</section>
 
 				<section>
-					<h2>Hotwire-Rails Wrap-up</h2>
+					<h3>Hotwire-Rails Wrap-up</h3>
 					<section>
-						<h3>Current Drawbacks</h3>
-						<p>
-							Non-standard routes / actions are tricky
+						<small><p>
+							<b>Benefits</b></p>
+							<ul>
+								<li>Powerful & flexible</li>
+								<li>Encourages good partials</li>
+								<li>A Real-Time Rails SPA with Rails Mindset</li>
+							</ul>
 							<br>
-							<small>(Like & Retweet - never figured out how to broadcast)</small>
-							<br>
-							<br>
-							Silent failures are annoying<br>
-							<small>(when the controller finds something to render - but not where!)</small>
-						</p>
-					</section>
-					<section>
-						<h3>Benefits</h3>
-						<p>
-							Hotwire - encourages / requires `view` modularization
-							<br><br>
-							A Rails SPA without JavaScript is now possible
-							<br><br>
-							Planned arrival is Rails 7.0
-						</p>
+							<p><b>Drawbacks</b></p>
+							<ul>
+								<li>Non-standard routes / actions are tricky</li>
+								<li>Silent failures are COMMON and tricky</li>
+							</ul>
+						</small>
 					</section>
 				</section>
 
