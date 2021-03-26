@@ -71,6 +71,24 @@
 								</ul>
 						</ol>
 					</section>
+					<section>
+						<p><b>Test - Real-Time SPA</b></p>
+						<small>
+							<p>goal is that the following all work as a real-time single-page app</p>
+							<ol>
+								<li>create a new tweet (BOTH browsers update)</li>
+								<li>create an blank tweet (see VALIDATION errors)</li>
+								<li>cancel in the new tweet form</li>
+								<li>delete updates both pages</li>
+								<li>delete a tweet (BOTH browsers update)</li>
+								<li>edit - form opens</li>
+								<li>edit - clear form and submit (see validation errors)</li>
+								<li>edit - cancel button works (original tweet is displayed)</li>
+								<li>edit - form opens, make a change and update</li>
+								<li>updated tweet is now on both browsers</li>
+							</ol>
+						</small>
+					</section>
 				</section>
 
 				<section>
@@ -464,7 +482,7 @@
 							      format.html { redirect_to tweets_url, notice: "Tweet was successfully created." }
 							      format.json { render :show, status: :created, location: @tweet }
 							    else
-							      format.turbo_stream { # route turbo validation errors
+							      format.turbo_stream { # route turbo validation errors to replace `form`
 							            render turbo_stream: turbo_stream.replace(
 							                        @tweet, partial: "tweets/form",
 							                        locals: { tweet: @tweet}) }
@@ -475,7 +493,7 @@
 							end
 						</code></pre>
 						<small>
-							<p>now it can route the error condition but doesn't know where to send the updated html</p>
+							<p>now it can route the error condition but doesn't know where to send the updated html form (we need another dom_id)</p>
 						</small>
 					</section>
 					<section>
@@ -518,58 +536,14 @@
 				<section>
 					<h3>3e. ENABLE: Turbo Forms - edit</h3>
 					<section>
-						<small>
-							<p>Add `turbo_frame_tag "tweet-form"` around the form.</p>
-						</small>
-						<pre><code data-trim data-noescape>
-										# app/views/tweets/index.html.erb
-										&lt;h1>Tweets&lt;/h1>
-										<%= turbo_stream_from "tweets" %>
-
-										&lt;h2 class="mt-3 h4 text-muted">New Tweet&lt;/h2>
-										&lt;div class="card card-body">
-										  <%= turbo_frame_tag "tweet-form" do %>
-										    <%= render "tweets/form" , tweet: @tweet %>
-										  <% end %>
-										&lt;/div>
-
-										&lt;h2 class="mt-3 h4 text-muted">Tweet Feed&lt;/h2>
-										<%= turbo_frame_tag "tweets" do %>
-										  <%= render @tweets %>
-										<% end %>
-										</code></pre>
-						<small>
-							<p>Create a new tweet works but now when we enter a blank message<br>
-								our form disappears and we get no validation errors.<br>
-								Turbo Stream - doesn't know how to route this non-standard action.
-							</p>
-						</small>
-					</section>
-					<section>
-						<small>
-							<p>To get validation errors add `format.turbo_stream` to override standard action<br>
-								(unlike happy path `create` -- where Turbo knows what to do)</p>
-						</small>
-
-						<small>
-							<p>
-								Tweet form now fully works with Turbo!
-							</p>
-						</small>
-					</section>
-
-				</section>
-
-				<section>
-					<section>
 						<pre><code data-trim data-noescape>
 						# app/views/tweets/edit.html.erb
 						&lt;h1>Editing Tweet&lt;/h1>
 
 						<%= turbo_frame_tag dom_id(@tweet) do %>
-						&lt;div class="card card-body">
-						  <%= render 'form' , tweet: @tweet %>
-						&lt;/div>
+						  &lt;div class="card card-body">
+						    <%= render 'form' , tweet: @tweet %>
+						  &lt;/div>
 						<% end %>
 						</code></pre>
 						<small><p>
@@ -578,6 +552,26 @@
 						</p></small>
 					</section>
 					<section>
+						<p><b>Test/Demo</b></p>
+						<small>
+							<p>(let's be sure nothing broke):</p>
+							<ol>
+								<li>create a new tweet (BOTH browsers update)</li>
+								<li>create an blank tweet (see VALIDATION errors)</li>
+								<li>cancel in the new tweet form</li>
+								<li>delete updates both pages</li>
+								<li>delete a tweet (BOTH browsers update)</li>
+								<li>edit - form opens</li>
+								<li>edit - clear form - validation errors</li>
+								<li>edit - cancel button works</li>
+								<li>edit - form opens and click update</li>
+								<li>oops - tweet card disappears (silent failure)</li>
+							</ol>
+							<p>Rails is sending the `show` html, but doesn't know where to inject it into the page</p>
+						</small>
+					</section>
+					<section>
+						<small><p>The solution is to add a dom_id to the show page too</p></small>
 						<pre><code data-trim data-noescape>
 						# app/views/tweets/show.html.erb
 						<%= turbo_frame_tag dom_id(@tweet) do %>
@@ -585,9 +579,25 @@
 						<% end %>
 						</code></pre>
 						<small>
-							<p>CAUTION - without the show dom_id the Turbo sends the HTML<br>
-								doesn't find where to put the HTML and fails silently!</p>
+							<p>Now our app works fully as a Real-Time Single Page App!</p>
 						</small>
+					</section>
+					<section>
+							<p><b>Test/Demo</b></p>
+							<small>
+								<ol>
+									<li>create a new tweet (BOTH browsers update)</li>
+									<li>create an blank tweet (see VALIDATION errors)</li>
+									<li>cancel in the new tweet form</li>
+									<li>delete updates both pages</li>
+									<li>delete a tweet (BOTH browsers update)</li>
+									<li>edit - form opens</li>
+									<li>edit - clear form and submit (see validation errors)</li>
+									<li>edit - cancel button works (original tweet is displayed)</li>
+									<li>edit - form opens, make a change and update</li>
+									<li>updated tweet is now on both browsers</li>
+								</ol>
+							</small>
 					</section>
 				</section>
 
@@ -598,17 +608,20 @@
 							<b>Benefits</b></p>
 							<ul>
 								<li>Easy install</li>
-								<li>Easy legacy upgrade</li>
 								<li>Powerful and flexible</li>
-								<li>Encourages good partials</li>
-								<li>A Real-Time Rails SPA with Rails Mindset</li>
+								<li>Easy(ish) legacy upgrade</li>
+								<li>Encourages good organization/partials</li>
+								<li>A Real-Time SPA with a Ruby/Rails Mindset</li>
 							</ul>
 							<br>
-							<p><b>Drawbacks</b></p>
+							<p><b>Drawbacks</b><br><em>(subject to change)</em></p>
 							<ul>
 								<li>Non-standard routes/actions are tricky</li>
 								<li>Silent failures are COMMON and tricky</li>
 								<li>https://github.com/beflagrant/hotwire-debug</li>
+								<li>Devise forms / routes need to be adapted</li>
+								<li>Modals and Flash messages need special handling</li>
+								<li>Nested routes are complex and need additional handling</li>
 							</ul>
 						</small>
 					</section>
