@@ -51,7 +51,7 @@
 						<img src="./images/Tweets_w_Frames.png" height="400px">
 						<small>
 							<ul>
-								<li><b>Code:</b> https://github.com/btihen/hotwire_tweets</li>
+								<li><b>Code:</b> https://github.com/btihen/ruby_kafi_hotwire_tweets</li>
 								<li><b>Talk:</b> https://github.com/btihen/ruby_kafi_hotwire_slides</li>
 							</ul>
 						</small>
@@ -113,7 +113,6 @@
 							end
 						</code></pre>
 					</section>
-
 					<section>
 						<small><p>Add Bootstrap</p></small>
 					</small>
@@ -128,7 +127,6 @@
 							&lt;/head>
 						</code></pre>
 					</section>
-
 					<section>
 						<small>
 							<p>Partials are very helpful for hotwire 'frames', so we will make a tweet partial</p>
@@ -154,7 +152,6 @@
 							&lt;/div>
 						</code></pre>
 					</section>
-
 					<section>
 						<small>
 							<p>to use the new partials and add a bit of formatting,<br>
@@ -179,7 +176,6 @@
 							<%= link_to 'Back' , tweets_path %>
 						</code></pre>
 					</section>
-
 					<section>
 						<small>
 							<p>CONTROLLER:
@@ -212,7 +208,6 @@
 						  end
 						</code></pre>
 					</section>
-
 					<section>
 						<small>
 							<p>Finally, since the form is on the index page let's add a cancel button to clear the form</p>
@@ -223,6 +218,7 @@
 							  <%= link_to "Cancel" , @tweet, class: "btn btn-sm btn-outline-danger" %>
 							&lt;/div>
 						</code></pre>
+						<small><p>https://github.com/btihen/ruby_kafi_hotwire_tweets/tree/standard_tweets/app/views/tweets</p></small>
 					</section>
 				</section>
 
@@ -251,7 +247,7 @@
 					<section>
 						<p>Configure</p>
 						<small>
-							<p>https://github.com/btihen/tweets_hotwire/commit/a09bcdab0d6509b73cb0e7b7fa0bf13611c173ff</p>
+							<p>https://github.com/btihen/ruby_kafi_hotwire_tweets/tree/hotwire_install_config/app/views/tweets</p>
 						</small>
 						<pre><code data-trim data-noescape>
 							# app/views/layouts/application.html.erb
@@ -274,7 +270,7 @@
 					<h3>3a. ENABLE: Broadcast - Create</h3>
 					<small>
 						<p>
-							https://github.com/btihen/tweets_hotwire/commit/42e68b8d886cda3e55d9d0daad5c033c5e9cb89e
+							https://github.com/btihen/ruby_kafi_hotwire_tweets/tree/hotwire_broadcast_create
 						</p>
 					</small>
 					<section>
@@ -338,7 +334,7 @@
 
 				<section>
 					<h3>3b. ENABLE: Broadcast - Delete</h3>
-					<small>https://github.com/btihen/tweets_hotwire/commit/c40a66d7f949f3a280566bb3369a1168b1e0721e</small>
+					<small><p>https://github.com/btihen/ruby_kafi_hotwire_tweets/tree/hotwire_broadcast_delete</p></small>
 					<section>
 						<pre><code data-trim data-noescape>
 						# app/models/tweet.rb
@@ -387,7 +383,7 @@
 				<section>
 					<h3>3c. ENABLE: Broadcast - Updates</h3>
 					<small>
-						<p>https://github.com/btihen/tweets_hotwire/commit/e16f3c525f93e41130d40cf80932a1e6eaac9ea3</p>
+						<p>https://github.com/btihen/ruby_kafi_hotwire_tweets/tree/hotwire_broadcast_update</p>
 					</small>
 					<section>
 						<small>
@@ -440,6 +436,9 @@
 
 				<section>
 					<h3>3d. ENABLE: Turbo Forms - new</h3>
+					<small><p>
+						https://github.com/btihen/ruby_kafi_hotwire_tweets/tree/hotwire_enable_forms_new
+					</p></small>
 					<section>
 						<small>
 							<p>Add `turbo_frame_tag "tweet-form"` around the form.</p>
@@ -503,13 +502,9 @@
 							</p>
 						</small>
 						<pre><code data-trim data-noescape>
+							# app/views/tweets/_form.html.erb
 							<%= form_with(model: tweet, id: dom_id(tweet)) do |form| %>
-							  &lt;div class="field">
-							    <%= form.text_area :body %>
-							  &lt;/div>
-							  &lt;div class="actions">
-							    <%= form.submit %>
-							  &lt;/div>
+							  <%# ... %>
 							<% end %>
 						</code></pre>
 						<small>
@@ -535,6 +530,11 @@
 
 				<section>
 					<h3>3e. ENABLE: Turbo Forms - edit</h3>
+					<small>
+						<p>
+							https://github.com/btihen/ruby_kafi_hotwire_tweets/tree/hotwire_enable_forms_edit
+						</p>
+					</small>
 					<section>
 						<pre><code data-trim data-noescape>
 						# app/views/tweets/edit.html.erb
