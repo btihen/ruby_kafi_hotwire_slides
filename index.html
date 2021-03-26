@@ -46,77 +46,214 @@
 				</section>
 
 				<section>
-					<h3>Standard App</h3>
-					<pre><code data-trim data-noescape>
-						$ rails new tweets -d postgresql -T --skip-turbolinks
-						$ cd tweets
-						$ bin/rails g scaffold tweet body:text likes:integer
-						# app/models/tweet.rb
-						class Tweet < ApplicationRecord
-						  validates :body, presence: true
-						end
-					</code></pre>
+					<section>
+						<p>Final SPA Hotwire Rails App</p>
+						<img src="./images/Tweets_w_Frames.png" height="400px">
+						<small>
+							<ul>
+								<li><b>Code:</b> https://github.com/btihen/hotwire_tweets</li>
+								<li><b>Talk:</b> https://github.com/btihen/ruby_kafi_hotwire_slides</li>
+							</ul>
+						</small>
+					</section>
+					<section>
+						<h3>Steps to migrate</h3>
+						<ol>
+							<li>Create Standard Rails App</li>
+							<li>Install/Configure Hotwire-rails</li>
+							<li>Enable Hotwire
+								<ul>
+									<li>3a. Broadcast: creates</li>
+									<li>3b. Broadcast: deletes</li>
+									<li>3c. Broadcast: updates</li>
+									<li>3d. Turbo Forms - new</li>
+									<li>3d. Turbo Forms - edit</li>
+								</ul>
+						</ol>
+					</section>
 				</section>
 
 				<section>
-					<h3>SPA Hotwire App</h3>
-					<img src="./images/Tweets_w_Frames.png" height="400px">
-					<small>
-						<ul>
-							<li><b>Code:</b> https://github.com/btihen/tweets_hotwire</li>
-							<li><b>Talk:</b> https://github.com/btihen/ruby_kafi_hotwire_slides</li>
-						</ul>
+					<h3>1. Create Standard Rails App</h3>
+					<section>
+						<small><p>Create our app, model with validations and routes</p></small>
+						<pre><code data-trim data-noescape>
+							$ rails new tweets -d postgresql -T --skip-turbolinks
+							$ cd tweets
+							$ bin/rails g scaffold tweet body:text
+							# update the migration to dissallow nil in body
+							$ bin/rails db:create
+							$ bin/rails db:migrate
+							# app/models/tweet.rb
+							class Tweet < ApplicationRecord
+							  validates :body, presence: true
+							end
+							# config/routes.rb
+							Rails.application.routes.draw do
+							  resources :tweets
+							  root to: "tweets#index"
+							end
+						</code></pre>
+					</section>
+
+					<section>
+						<small><p>Add Bootstrap</p></small>
 					</small>
+						<pre><code data-trim data-noescape>
+							# app/views/layouts/application.html.erb
+							  &lt;link rel="stylesheet"
+							        href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css"
+							        integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l"
+							        crossorigin="anonymous">
+							  <%= stylesheet_link_tag 'application' , media: 'all' %>
+							  <%= javascript_pack_tag 'application' %>
+							&lt;/head>
+						</code></pre>
+					</section>
+
+					<section>
+						<small>
+							<p>Partials are very helpful for hotwire 'frames', so we will make a tweet partial</p>
+						</small>
+						<pre><code data-trim data-noescape>
+							# app/views/tweets/_tweet.html.erb
+							&lt;div class="card card-body">
+							  &lt;div><%= tweet.body %>&lt;/div>
+							  <%= render "tweets/tweet_actions" , tweet: tweet %>
+							&lt;/div>
+						</code></pre>
+						<small>
+							<p>and a tweet action partial</p>
+						</small>
+						<pre><code data-trim data-noescape>
+							# app/views/tweets/_tweet_actions.html.erb
+							&lt;div class="btn-toolbar mt-4" role="toolbar">
+							  &lt;div class="btn-group mr-2" role="group">
+							    <%= link_to 'Edit' , edit_tweet_path(tweet), class: "btn btn-sm btn-outline-primary" %>
+							    <%= link_to 'Destroy' , tweet_path(tweet), method: :delete,
+							                data: { confirm: 'Are you sure?' }, class: "btn btn-sm btn-outline-danger" %>
+							  &lt;/div>
+							&lt;/div>
+						</code></pre>
+					</section>
+
+					<section>
+						<small>
+							<p>to use the new partials and add a bit of formatting,<br>
+								we update the index template (view)</p>
+						</small>
+						<pre><code data-trim data-noescape>
+							# app/views/tweets/index.html.erb
+							&lt;h1>Tweets</h1>
+							&lt;h2 class="mt-3 h4 text-muted">New Tweet</h2>
+							&lt;div class="card card-body">
+							  <%= render "tweets/form" , tweet: @tweet %>
+							&lt;/div>
+							&lt;h2 class="mt-3 h4 text-muted">Tweet Feed</h2>
+							<%= render @tweets %>
+						</code></pre>
+						<small>
+							<p>and show template (view)</p>
+						</small>
+						<pre><code data-trim data-noescape>
+							# app/views/tweets/show.html.erb
+							<%= render @tweet %>
+							<%= link_to 'Back' , tweets_path %>
+						</code></pre>
+					</section>
+
+					<section>
+						<small>
+							<p>CONTROLLER:
+								<ul>
+									<li>enable form to work</li>
+									<li>newest tweets first</li>
+									<li>render index on create</li>
+								</ul>
+							</p>
+						</small>
+						<pre><code data-trim data-noescape>
+							# app/controllers/tweets_controller.rb
+							class TweetsController < ApplicationController
+							def index
+							  @tweets = Tweet.all.order(created_at: :desc) # newest first
+							  @tweet = Tweet.new  # allows new form on index page
+							end
+
+							def create
+							  @tweet = Tweet.new(tweet_params)
+							  respond_to do |format|
+							    if @tweet.save  # render index not show
+							      format.html { redirect_to tweets_url, notice: "Tweet was successfully created." }
+							      format.json { render :show, status: :created, location: @tweet }
+							    else
+							      format.html { render :new, status: :unprocessable_entity }
+							      format.json { render json: @tweet.errors, status: :unprocessable_entity }
+							    end
+							  end
+						  end
+						</code></pre>
+					</section>
+
+					<section>
+						<small>
+							<p>Finally, since the form is on the index page let's add a cancel button to clear the form</p>
+						</small>
+						<pre><code data-trim data-noescape>
+							&lt;div class="actions">
+							  <%= form.submit class: "btn btn-sm btn-outline-success" %>
+							  <%= link_to "Cancel" , @tweet, class: "btn btn-sm btn-outline-danger" %>
+							&lt;/div>
+						</code></pre>
+					</section>
 				</section>
 
 				<section>
-					<h3>Steps to Transform</h3>
-					<ol>
-						<li>Install Hotwire-rails</li>
-						<li>Check Config</li>
-						<li>Broadcast: creates</li>
-						<li>Broadcast: deletes</li>
-						<li>Turbo Forms</li>
-						<li>Broadcast: edits</li>
-					</ol>
-				</section>
-
-				<section>
-					<h3>1. Install Hotwire</h3>
-					<small>
-						<h3>Requirements</h3>
-						<p>Redis installed and running on host system</p>
-					</small>
-					<pre><code data-trim data-noescape>
-						$ bundle add hotwire-rails
-						$ bin/rails hotwire:install
-					</code></pre>
-				</section>
-
-				<section>
-					<h3>2. Check Hotwire Config</h3>
+					<h3>2. Install/Configure Hotwire</h3>
+					<section>
+						<p>Install</p>
+						<small>
+							<p>REQUIREMENT: Redis installed and running on host system</p>
+						</small>
+						<pre><code data-trim data-noescape>
+							$ bundle add hotwire-rails
+							$ bin/rails hotwire:install
+						</code></pre>
+						<small>
+							<p>For demo only add CSS to see the turbo-frames we add</p>
+						</small>
+						<pre><code data-trim data-noescape>
+							# app/assets/stylesheets/tweets.scss
+							turbo-frame {
+							  display: block;
+							  border: 2px solid green
+							}
+						</code></pre>
+					</section>
+					<section>
+						<p>Configure</p>
 						<small>
 							<p>https://github.com/btihen/tweets_hotwire/commit/a09bcdab0d6509b73cb0e7b7fa0bf13611c173ff</p>
 						</small>
 						<pre><code data-trim data-noescape>
 							# app/views/layouts/application.html.erb
-							<%= stylesheet_link_tag 'application' , media: 'all' %>
-							<%= javascript_pack_tag 'application' %>
-							<%= yield :head %>
-							<%= turbo_include_tags %>
+							  <%= yield :head %>
+							  <%= turbo_include_tags %>
+							&lt;/head>
 						</code></pre>
 						<small>
-						<p>Check Header section of application.html.erb</p>
-						<ul>
-							<li>Turbo Added</li>
-							<li>Turbo-Links Removed</li>
-						</ul>
-					</small>
+							<p>In the head of `application.html.erb`</p>
+							<ul>
+								<li>Add the `turbo_include_tags`</li>
+								<li>Be sure Turbo-Links is Removed</li>
+							</ul>
+							<p>If turbo-links was installed verify its removed everywhere</p>
+						</small>
+					</section>
 				</section>
 
-
 				<section>
-					<h3>3. Real-Time Broadcast - Create</h3>
+					<h3>3a. ENABLE: Broadcast - Create</h3>
 					<small>
 						<p>
 							https://github.com/btihen/tweets_hotwire/commit/42e68b8d886cda3e55d9d0daad5c033c5e9cb89e
@@ -144,8 +281,15 @@
 					<section>
 							<pre><code data-trim data-noescape>
 							# app/views/tweets/index.html.erb
+							&lt;h1>Tweets&lt;/h1>
 							<%= turbo_stream_from "tweets" %>
 
+							&lt;h2 class="mt-3 h4 text-muted">New Tweet&lt;/h2>
+							&lt;div class="card card-body">
+							  <%= render "tweets/form" , tweet: @tweet %>
+							&lt;/div>
+
+							&lt;h2 class="mt-3 h4 text-muted">Tweet Feed&lt;/h2>
 							<%= turbo_frame_tag "tweets" do %>
 							  <%= render @tweets %>
 							<% end %>
@@ -160,10 +304,22 @@
 							</p>
 						</small>
 					</section>
+					<section>
+						<p><b>Test/Demo</b></p>
+						<small>
+							<p>(with two browsers):</p>
+							<ol>
+								<li>create a new tweet (BOTH browsers update)</li>
+								<li>create an blank tweet (see VALIDATION errors)</li>
+								<li>cancel in the new tweet form</li>
+								<li>delete a tweet (does NOT update other browser)</li>
+							</ol>
+						</small>
+					</section>
 				</section>
 
 				<section>
-					<h3>4. Real-Time Broadcast - Delete</h3>
+					<h3>3b. ENABLE: Broadcast - Delete</h3>
 					<small>https://github.com/btihen/tweets_hotwire/commit/c40a66d7f949f3a280566bb3369a1168b1e0721e</small>
 					<section>
 						<pre><code data-trim data-noescape>
@@ -181,94 +337,230 @@
 						<small><p>Each tweet displayed needs its own frame</p></small>
 						<pre><code data-trim data-noescape>
 						# app/views/tweets/_tweet.html.erb
-						<%= turbo_frame_tag tweet do %>
+						<%= turbo_frame_tag dom_id(tweet) do %>
+						&lt;div class="card card-body">
 						  <%= tweet.body %>
 						  <%= render "actions", locals: {tweet: tweet} %>
+						&lt;/div>
 						<% end %>
 						</code></pre>
-						<small><p>in this way turbo can find and remove the exact tweet HTML</p></small>
+						<small>
+							<p>in this way turbo can find and remove the exact tweet HTML<br>
+							with just the tweet in the frame (without the dom_id) the dom_id uses the object memory address (not very readable)!</p></small>
+					</section>
+					<section>
+						<p><b>Test/Demo</b></p>
+						<small>
+							<p>(with two browsers):</p>
+							<ol>
+								<li>notice the double thick frame wall on reloads</li>
+								<li>create a new tweet (BOTH browsers update)</li>
+								<li>create an blank tweet (see VALIDATION errors)</li>
+								<li>cancel in the new tweet form</li>
+								<li>delete now updates both pages</li>
+								<li>delete a tweet (BOTH browsers update)</li>
+								<li>edit - cell disappears (silent error)!</li>
+							</ol>
+							<p>We need to enable turbo in the forms so it knows what and where to update</p>
+						</small>
 					</section>
 				</section>
 
 				<section>
-					<h3>5. Setup Turbo Forms</h3>
-					<small><p>https://github.com/btihen/tweets_hotwire/commit/11f7131542c8011ae40ae7a02ed3704ea129930c</p></small>
+					<h3>3c. ENABLE: Broadcast - Updates</h3>
+					<small>
+						<p>https://github.com/btihen/tweets_hotwire/commit/e16f3c525f93e41130d40cf80932a1e6eaac9ea3</p>
+					</small>
 					<section>
+						<small>
+							<p>We will update the model again</p>
+						</small>
+						<pre><code data-trim data-noescape>
+							# app/models/tweet.rb
+							class Tweet < ApplicationRecord
+							  validates :body, presence: true
+
+							  after_create_commit { broadcast_prepend_to "tweets" }
+							  after_destroy_commit { broadcast_remove_to "tweets" }
+							  after_update_commit { broadcast_replace_to "tweets" }
+							end
+						</code></pre>
+					</section>
+					<section>
+						<small>
+							<p>Forms are a bit complicated (we'll do them last).<br>
+								Let's test update with the console</p>
+						</small>
+						<pre><code data-trim data-noescape>
+							$ bin/rails c
+							> tweet = Tweet.all.sample
+							> tweet.update(body: "changed")
+							> tweet = Tweet.all.sample
+							> tweet.destroy
+							> Tweet.create(body: "nothing new")
+						</code></pre>
+						<small>
+							<p>we see that both pages updated!</p>
+						</small>
+					</section>
+					<section>
+						<p><b>Test/Demo</b></p>
+						<small>
+							<p>(let's be sure nothing broke):</p>
+							<ol>
+								<li>create a new tweet (BOTH browsers update)</li>
+								<li>create an blank tweet (see VALIDATION errors)</li>
+								<li>cancel in the new tweet form</li>
+								<li>delete now updates both pages</li>
+								<li>delete a tweet (BOTH browsers update)</li>
+								<li>edit - cell disappears (silent error)!</li>
+							</ol>
+							<p>We still need to enable turbo in the forms so we can update in the GUI</p>
+						</small>
+					</section>
+				</section>
+
+				<section>
+					<h3>3d. ENABLE: Turbo Forms - new</h3>
+					<section>
+						<small>
+							<p>Add `turbo_frame_tag "tweet-form"` around the form.</p>
+						</small>
 						<pre><code data-trim data-noescape>
 						# app/views/tweets/index.html.erb
+						&lt;h1>Tweets&lt;/h1>
 						<%= turbo_stream_from "tweets" %>
 
-						New Tweets
-						<%= turbo_frame_tag "tweet-form" do %>
-						  <%= render "tweets/form" , tweet: @tweet %>
-						<% end %>
+						&lt;h2 class="mt-3 h4 text-muted">New Tweet&lt;/h2>
+						&lt;div class="card card-body">
+						  <%= turbo_frame_tag "tweet-form" do %>
+						    <%= render "tweets/form" , tweet: @tweet %>
+						  <% end %>
+						&lt;/div>
 
-						Tweet Feed
+						&lt;h2 class="mt-3 h4 text-muted">Tweet Feed&lt;/h2>
 						<%= turbo_frame_tag "tweets" do %>
 						  <%= render @tweets %>
 						<% end %>
 						</code></pre>
+						<small><p>Create a new tweet works but now when we enter a blank message<br>
+							our form disappears and we get no validation errors.<br>
+							Turbo Stream - doesn't know how to route this non-standard action.
+						</p></small>
+					</section>
+
+					<section>
+						<small>
+							<p>In our create controller we can tell turbo how to route this stream.
+							</p>
+						</small>
+						<pre><code data-trim data-noescape>
+							# app/controllers/tweets_controller.rb
+							def create
+							  @tweet = Tweet.new(tweet_params)
+
+							  respond_to do |format|
+							    if @tweet.save
+							      format.html { redirect_to tweets_url, notice: "Tweet was successfully created." }
+							      format.json { render :show, status: :created, location: @tweet }
+							    else
+							      format.turbo_stream { # route turbo validation errors
+							            render turbo_stream: turbo_stream.replace(
+							                        @tweet, partial: "tweets/form",
+							                        locals: { tweet: @tweet}) }
+							      format.html { render :new, status: :unprocessable_entity }
+							      format.json { render json: @tweet.errors, status: :unprocessable_entity }
+							    end
+							  end
+							end
+						</code></pre>
+						<small>
+							<p>now it can route the error condition but doesn't know where to send the updated html</p>
+						</small>
 					</section>
 					<section>
+						<small>
+							<p>
+								If we add a DOM-ID to the form now the validations errors html can be updated
+							</p>
+						</small>
 						<pre><code data-trim data-noescape>
-						# app/controllers/tweets_controller.rb
-						def create
-						  @tweet = Tweet.new(tweet_params)
-						  respond_to do |format|
-						    if @tweet.save
-						      format.html { render tweet }
-						    else
-						      format.turbo_stream {
-						        render turbo_stream: turbo_stream.replace(
-						                @tweet, partial: "tweets/form",
-						                locals: { tweet: @tweet}) }
-						      format.html { render :new }
-						    end
-						  end
-						end
+							<%= form_with(model: tweet, id: dom_id(tweet)) do |form| %>
+							  &lt;div class="field">
+							    <%= form.text_area :body %>
+							  &lt;/div>
+							  &lt;div class="actions">
+							    <%= form.submit %>
+							  &lt;/div>
+							<% end %>
 						</code></pre>
+						<small>
+							<p>Whew - validations work again.</p>
+						</small>
+					</section>
+					<section>
+						<p><b>Test/Demo</b></p>
+						<small>
+							<p>(let's be sure nothing broke):</p>
+							<ol>
+								<li>create a new tweet (BOTH browsers update)</li>
+								<li>create an blank tweet (see VALIDATION errors)</li>
+								<li>cancel in the new tweet form</li>
+								<li>delete updates both pages</li>
+								<li>delete a tweet (BOTH browsers update)</li>
+								<li>edit - cell disappears (silent error)!</li>
+							</ol>
+							<p>We still need to enable turbo in the forms so we can update in the GUI</p>
+						</small>
+					</section>
+				</section>
+
+				<section>
+					<h3>3e. ENABLE: Turbo Forms - edit</h3>
+					<section>
+						<small>
+							<p>Add `turbo_frame_tag "tweet-form"` around the form.</p>
+						</small>
+						<pre><code data-trim data-noescape>
+										# app/views/tweets/index.html.erb
+										&lt;h1>Tweets&lt;/h1>
+										<%= turbo_stream_from "tweets" %>
+
+										&lt;h2 class="mt-3 h4 text-muted">New Tweet&lt;/h2>
+										&lt;div class="card card-body">
+										  <%= turbo_frame_tag "tweet-form" do %>
+										    <%= render "tweets/form" , tweet: @tweet %>
+										  <% end %>
+										&lt;/div>
+
+										&lt;h2 class="mt-3 h4 text-muted">Tweet Feed&lt;/h2>
+										<%= turbo_frame_tag "tweets" do %>
+										  <%= render @tweets %>
+										<% end %>
+										</code></pre>
+						<small>
+							<p>Create a new tweet works but now when we enter a blank message<br>
+								our form disappears and we get no validation errors.<br>
+								Turbo Stream - doesn't know how to route this non-standard action.
+							</p>
+						</small>
+					</section>
+					<section>
 						<small>
 							<p>To get validation errors add `format.turbo_stream` to override standard action<br>
 								(unlike happy path `create` -- where Turbo knows what to do)</p>
 						</small>
-					</section>
-					<section>
-						<small><p>
-							Form now also needs a DOM-ID added
-						</p></small>
-						<pre><code data-trim data-noescape>
-						<%= form_with(model: tweet, id: dom_id(tweet)) do |form| %>
-						  &lt;div class="field">
-						    <%= form.text_area :body %>
-						  &lt;/div>
-						  &lt;div class="actions">
-						    <%= form.submit %>
-						  &lt;/div>
-						<% end %>
-						</code></pre>
+
 						<small>
 							<p>
 								Tweet form now fully works with Turbo!
 							</p>
 						</small>
 					</section>
+
 				</section>
 
 				<section>
-					<h3>6. Real-Time Broadcast - Edits</h3>
-					<small><p>https://github.com/btihen/tweets_hotwire/commit/e16f3c525f93e41130d40cf80932a1e6eaac9ea3</p></small>
-					<section>
-						<pre><code data-trim data-noescape>
-						# app/models/tweet.rb
-						class Tweet < ApplicationRecord
-						  validates :body, presence: true
-
-						  after_create_commit { broadcast_prepend_to "tweets" }
-						  after_destroy_commit { broadcast_remove_to "tweets" }
-						  after_update_commit { broadcast_replace_to "tweets" }
-						end
-						</code></pre>
-					</section>
 					<section>
 						<pre><code data-trim data-noescape>
 						# app/views/tweets/edit.html.erb
