@@ -627,6 +627,301 @@
 					</section>
 				</section>
 
+				<section>
+					<h3>EXTRA: Hotwire Flash Messages</h3>
+					<section>
+						<small>
+							<p>
+								Hotwire <b>MUST send data to PARTIALS</b> -- so we will make a flash partial (from the default rails notification). <br>
+								Now add the partial to the `application.html.erb` file
+							</p>
+						</small>
+						<pre><code data-trim data-noescape>
+							# app/views/shared/_notification.html.erb
+							&lt;p id="notice">
+							  <%= notice %>
+							&lt;/p>
+
+							# app/views/layouts/application.html.erb
+							&lt;body>
+							  <%= render "shared/notice" , notice: notice %>
+							  <%= yield %>
+							&lt;/body>
+						</code></pre>
+					</section>
+					<section>
+						<small>
+							<p>
+								now we need to tell hotwire how to send to the flash message - so we will create a turbo_template and have the controller use it:
+							</p>
+						</small>
+						<pre><code data-trim data-noescape>
+							# app/views/tweets/create.turbo_stream.erb
+							<%# to send a message to the notice partial %>
+							<%= turbo_stream.append "notice" , partial: "shared/notice" ,
+							                        locals: {notice: "Tweet was successfully created." } %>
+
+							# app/controllers/tweets_controller.rb
+							def create
+							  @tweet = Tweet.new(tweet_params)
+							  respond_to do |format|
+								  if @tweet.save
+								    format.turbo_stream    # uses the `create.turbo_stream.erb` template
+								    format.html { redirect_to tweets_url, notice: "Tweet was created." }
+								    format.json { render :show, status: :created, location: @tweet }
+								  else
+								    format.turbo_stream {render turbo_stream: turbo_stream.replace(
+								                                @tweet, partial: "tweets/form",
+								                                locals: { tweet: @tweet}) }
+								    format.html { render :new, status: :unprocessable_entity }
+								    format.json { render json: @tweet.errors, status: :unprocessable_entity }
+								  end
+							  end
+							end
+						</code></pre>
+					</section>
+
+					<section>
+						<small>
+							<p>
+								cool it works, but we have a new little bug - the new form doesn't clear after create,<br>
+								to fix we can either use JS or we can send a blank tweet to the form:
+							</p>
+						</small>
+						<pre><code data-trim data-noescape>
+							# app/views/tweets/create.turbo_stream.erb
+							<%# to send a message to the notice partial %>
+							<%= turbo_stream.append "notice", partial: "shared/notice" ,
+							                        locals: {notice: "Tweet was created." } %>
+
+							<%# clear form on create - without js %>
+							<%= turbo_stream.replace "tweet-form", partial: "tweets/form",
+							                        locals: { tweet: Tweet.new } %>
+
+							<%# NOTE: DO NOT TRY the following -- model is broadcasting - you will get two! %>
+							<%# turbo_stream.prepend "tweets", partial: "tweets/tweet",
+							                        locals: { tweet: @tweet } %>
+						</code></pre>
+					</section>
+
+					<section>
+						<small>
+							<p>
+								update is even simpler since the form doesn't need clearing (its already replaced with `show`)
+							</p>
+						</small>
+						<pre><code data-trim data-noescape>
+							# app/views/tweets/update.turbo_stream.erb
+							<%# to send a message to the notice partial %>
+							<%= turbo_stream.append "notice" , partial: "shared/notice" ,
+																			locals: {notice: "Tweet was updated." } %>
+
+							# app/controllers/tweets_controller.rb
+							def update
+							  respond_to do |format|
+							    if @tweet.update(tweet_params)
+							      format.turbo_stream          # uses the `update.turbo_stream.erb` template
+							      format.html { redirect_to @tweet, notice: "Tweet was successfully updated." }
+							      format.json { render :show, status: :ok, location: @tweet }
+							    else
+							      format.html { render :edit, status: :unprocessable_entity }
+							      format.json { render json: @tweet.errors, status: :unprocessable_entity }
+							    end
+							  end
+							end
+						</code></pre>
+					</section>
+					<section>
+						<small>
+							<p>
+								https://github.com/btihen/ruby_kafi_hotwire_tweets/tree/hotwire_flash_messages
+							</p>
+						</small>
+					</section>
+				</section>
+
+				<section>
+
+					<h3>EXTRA: Hotwire Modal Forms</h3>
+					<section>
+						<small>
+							<p>
+								Pre - Bootstrap needs jquery for this - update application.html.erb with:
+							</p>
+						</small>
+						<pre><code data-trim data-noescape>
+						# application.html.erb
+						&lt;body>
+						  &lt;p id="notice"><%= notice %>&lt;/p>
+						  <%= yield %>
+						  &lt;script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+							    integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+							    crossorigin="anonymous"></script>
+						  &lt;script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"
+						      integrity="sha384-Piv4xVNRyMGpqkS2by6br4gNJ7DXjqk09RmUpJ8jgGtD7zP9yug3goQfGII0yAns"
+						      crossorigin="anonymous"></script>
+						&lt;/body>
+						</code></pre>
+					</section>
+					<section>
+						<small>
+							<p>
+								Hotwire only sends to partials so to get the validations errors we will need a new `modal_form` partial - we will still use the old form for the edits (bit long for a slide see repo - mostly html)
+							</p>
+						<pre><code data-trim data-noescape>
+						# _modal_form.html.erb
+						<%= form_with(model: tweet, id: dom_id(tweet)) do |form| %>
+						  &lt;div class="modal-header">
+						    &lt;h5 class="modal-title">New Tweet</h5>
+						      &lt;button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						        &lt;span aria-hidden="true">&times;</span>
+						      &lt;/button>
+				        &lt;/div>
+						    &lt;div class="modal-body">
+						      <% if tweet.errors.any? %>
+						        &lt;div id="error_explanation">
+						          &lt;h2><%= pluralize(tweet.errors.count, "error" ) %> errors to fix:&lt;/h2>
+					          &lt;ul>
+							      <% tweet.errors.each do |error| %>
+							          &lt;li>
+						              <%= error.full_message %>
+						            &lt;/li>
+						          <% end %>
+						        &lt;/ul>
+						      &lt;/div>
+					      <% end %>
+							  &lt;div class="field">
+							    <%= form.label :body %>
+						      <%= form.text_area :body %>
+					      &lt;/div>
+				      &lt;/div>
+					    &lt;div class="modal-footer">
+						    &lt;div class="actions">
+						      <%= form.submit class: "btn btn-sm btn-outline-success" %>
+							    <%= link_to "Cancel" , tweet, class: "btn btn-sm btn-outline-danger" %>
+						    &lt;/div>
+						  &lt;/div>
+						<% end %>
+						</code></pre>
+						</small>
+					</section>
+					<section>
+						<small>
+							<p>
+								now simply point the controller (not valid path) at the new partial.
+							</p>
+						</small>
+						<pre><code data-trim data-noescape>
+						# tweets_controller.rb
+						def create
+						  @tweet = Tweet.new(tweet_params)
+						  respond_to do |format|
+						    if @tweet.save
+						      format.html { redirect_to tweets_url, notice: "Tweet was successfully created." }
+						      format.json { render :show, status: :created, location: @tweet }
+						    else
+						      format.turbo_stream { render turbo_stream: turbo_stream.replace(
+						                            @tweet, partial: "tweets/modal_form",
+						                            locals: { tweet: @tweet}) }
+						      format.html { render :new, status: :unprocessable_entity }
+						      format.json { render json: @tweet.errors, status: :unprocessable_entity }
+						    end
+						  end
+						end
+						</code></pre>
+					</section>
+
+					<section>
+						<small>
+							<p>
+								Alernatively, we could also use a turbo_stream template and a simpler controller:
+							</p>
+						</small>
+						<pre><code data-trim data-noescape>
+						# create.turbo_stream.erb
+						<%# send validation errors to the partial %>
+						<%= turbo_stream.replace @tweet, partial: "tweets/modal_form" , locals: { tweet: @tweet } %>
+
+						def create
+						  @tweet = Tweet.new(tweet_params)
+						  respond_to do |format|
+						    if @tweet.save
+						      format.html { redirect_to tweets_url, notice: "Tweet was successfully created." }
+						      format.json { render :show, status: :created, location: @tweet }
+						    else
+						      format.turbo_stream  # uses `create.turbo_stream.erb` template
+						      format.html { render :new, status: :unprocessable_entity }
+						      format.json { render json: @tweet.errors, status: :unprocessable_entity }
+						    end
+						  end
+						end
+						</code></pre>
+					</section>
+					<section>
+						<small>
+							<p>
+								https://github.com/btihen/ruby_kafi_hotwire_tweets/tree/hotwire_modal_new_tweet
+							</p>
+						</small>
+					</section>
+				</section>
+
+				<section>
+					<h3>EXTRA: Hotwire Modal Forms</h3>
+					<section>
+						<small>
+							<p>
+								Load data from the controllers and into the default template (after page is loaded)
+							</p>
+						</small>
+					</section>
+
+					<section>
+						<small>
+							<p>
+								https://github.com/btihen/ruby_kafi_hotwire_tweets/tree/hotwire_lazy_load_data
+							</p>
+						</small>
+					</section>
+				</section>
+
+
+				<section>
+					<h3>EXTRA: Mini-Notes</h3>
+					<section>
+						<small>
+							<p>
+								have a link reach outside the turbo-frame
+							</p>
+						</small>
+						<pre><code data-trim data-noescape>
+							<%= link_to 'back' , tweets_path, "data-turbo-frame" : "_top" %>
+						</code></pre>
+					</section>
+
+					<section>
+						<small>
+							<p>
+								You Stimulus to clear a form - create a js controller and attach it to the form:
+							</p>
+						</small>
+						<pre><code data-trim data-noescape>
+							# app/javascript/controllers/reset_form_controller.js
+							import { Controller } from "stimulus"
+							export default class extends Controller {
+							  reset() {
+							    this.element.reset()
+							  }
+							}
+
+							# app/views/tweets/_form.html.erb
+							<%= form_with(model: tweet, id: dom_id(tweet),
+							              data: { controller: "reset-form" ,
+							                      action: "turbo:submit-end->reset-form#reset" }
+							            ) do |form| %>
+						</code></pre>
+					</section>
+				</section>
 			</div>
 		</div>
 
