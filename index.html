@@ -17,30 +17,34 @@
 		<div class="reveal">
 			<div class="slides">
 				<section>
-					<h3>https://hotwire.dev/</h3>
 					<img src="./images/Hotwire_Rails.png" height="400px">
 					<br>
 					<small>
-						<ul>
-							<li>Replaces Turbo-Links</li>
-							<li>Sends/replaces HTML snippets</li>
-							<li>Turbo now forms and broadcasts</li>
-							<li>StimulusJS - for advanced needs</li>
-						</ul>
+						<p>
+							<b>Web/Docs:</b> https://hotwire.dev/
+							<br>
+							<ul>
+								<li>Replaces Turbo-Links</li>
+								<li>Sends/replaces HTML snippets</li>
+								<li>Turbo now forms and broadcasts</li>
+								<li>StimulusJS - for advanced needs</li>
+							</ul>
+						</p>
 					</small>
 				</section>
 
 				<section>
-					<h3>Rails 7.0 Default</h3>
 					<section>
 						<img src="./images/Modern_FE_Rails.jpg" height="400px">
 						<br>
 						<small>
 							<ul>
-								<li>Rails 6.x+</li>
 								<li>Minimal JavaScript</li>
 								<li>Single-Page -- Real-time</li>
+								<li>Default: Rails 7.0 (need to be activated)</li>
 							</ul>
+							<br>
+							<br><b>Already works with Rails 6.1</b>
 						</small>
 					</section>
 				</section>
@@ -159,12 +163,12 @@
 						</small>
 						<pre><code data-trim data-noescape>
 							# app/views/tweets/index.html.erb
-							&lt;h1>Tweets</h1>
-							&lt;h2 class="mt-3 h4 text-muted">New Tweet</h2>
+							&lt;h1>Tweets&lt;/h1>
+							&lt;h2 class="mt-3 h4 text-muted">New Tweet&lt;/h2>
 							&lt;div class="card card-body">
 							  <%= render "tweets/form" , tweet: @tweet %>
 							&lt;/div>
-							&lt;h2 class="mt-3 h4 text-muted">Tweet Feed</h2>
+							&lt;h2 class="mt-3 h4 text-muted">Tweet Feed&lt;/h2>
 							<%= render @tweets %>
 						</code></pre>
 						<small>
@@ -268,11 +272,6 @@
 
 				<section>
 					<h3>3a. ENABLE: Broadcast - Create</h3>
-					<small>
-						<p>
-							https://github.com/btihen/ruby_kafi_hotwire_tweets/tree/hotwire_broadcast_create
-						</p>
-					</small>
 					<section>
 							<pre><code data-trim data-noescape>
 							# app/models/tweet.rb
@@ -330,11 +329,17 @@
 							</ol>
 						</small>
 					</section>
+					<section>
+						<small>
+							<p>
+								https://github.com/btihen/ruby_kafi_hotwire_tweets/tree/hotwire_broadcast_create
+							</p>
+						</small>
+					</section>
 				</section>
 
 				<section>
 					<h3>3b. ENABLE: Broadcast - Delete</h3>
-					<small><p>https://github.com/btihen/ruby_kafi_hotwire_tweets/tree/hotwire_broadcast_delete</p></small>
 					<section>
 						<pre><code data-trim data-noescape>
 						# app/models/tweet.rb
@@ -378,13 +383,15 @@
 							<p>We need to enable turbo in the forms so it knows what and where to update</p>
 						</small>
 					</section>
+					<section>
+						<small>
+							<p>https://github.com/btihen/ruby_kafi_hotwire_tweets/tree/hotwire_broadcast_delete</p>
+						</small>
+					</section>
 				</section>
 
 				<section>
 					<h3>3c. ENABLE: Broadcast - Updates</h3>
-					<small>
-						<p>https://github.com/btihen/ruby_kafi_hotwire_tweets/tree/hotwire_broadcast_update</p>
-					</small>
 					<section>
 						<small>
 							<p>We will update the model again</p>
@@ -432,13 +439,15 @@
 							<p>We still need to enable turbo in the forms so we can update in the GUI</p>
 						</small>
 					</section>
+					<section>
+					<small>
+						<p>https://github.com/btihen/ruby_kafi_hotwire_tweets/tree/hotwire_broadcast_update</p>
+					</small>
+					</section>
 				</section>
 
 				<section>
 					<h3>3d. ENABLE: Turbo Forms - new</h3>
-					<small><p>
-						https://github.com/btihen/ruby_kafi_hotwire_tweets/tree/hotwire_enable_forms_new
-					</p></small>
 					<section>
 						<small>
 							<p>Add `turbo_frame_tag "tweet-form"` around the form.</p>
@@ -460,15 +469,12 @@
 						  <%= render @tweets %>
 						<% end %>
 						</code></pre>
-						<small><p>Create a new tweet works but now when we enter a blank message<br>
-							our form disappears and we get no validation errors.<br>
-							Turbo Stream - doesn't know how to route this non-standard action.
+						<small><p>Create works but not validation errors.
 						</p></small>
 					</section>
-
 					<section>
 						<small>
-							<p>In our create controller we can tell turbo how to route this stream.
+							<p>In our controller we can tell turbo how to update an invalid form.
 							</p>
 						</small>
 						<pre><code data-trim data-noescape>
@@ -526,15 +532,17 @@
 							<p>We still need to enable turbo in the forms so we can update in the GUI</p>
 						</small>
 					</section>
+					<section>
+						<small>
+							<p>
+								https://github.com/btihen/ruby_kafi_hotwire_tweets/tree/hotwire_enable_forms_new
+							</p>
+						</small>
+					</section>
 				</section>
 
 				<section>
 					<h3>3e. ENABLE: Turbo Forms - edit</h3>
-					<small>
-						<p>
-							https://github.com/btihen/ruby_kafi_hotwire_tweets/tree/hotwire_enable_forms_edit
-						</p>
-					</small>
 					<section>
 						<pre><code data-trim data-noescape>
 						# app/views/tweets/edit.html.erb
@@ -598,6 +606,13 @@
 									<li>updated tweet is now on both browsers</li>
 								</ol>
 							</small>
+					</section>
+					<section>
+					<small>
+						<p>
+							https://github.com/btihen/ruby_kafi_hotwire_tweets/tree/hotwire_enable_forms_edit
+						</p>
+					</small>
 					</section>
 				</section>
 
@@ -867,13 +882,73 @@
 				</section>
 
 				<section>
-					<h3>EXTRA: Hotwire Modal Forms</h3>
+					<h3>EXTRA: Hotwire Lazy-Load Data</h3>
 					<section>
 						<small>
 							<p>
-								Load data from the controllers and into the default template (after page is loaded)
+								Lets assume a default controller, but we still want to load the new form on the index page:
 							</p>
 						</small>
+						<pre><code data-trim data-noescape>
+							# tweets_controller.rb
+							def index
+							  @tweets = Tweet.all.order(created_at: :desc)
+							end
+
+							def new
+							  @tweet = Tweet.new
+							end
+						</code></pre>
+					</section>
+					<section>
+						<small>
+							<p>
+								We can lazy load data from controllers and use their default templates with a frame tag, source tag and a target ("_top" - means reach outside the current frame).
+								<br>Now our index page would look like:
+							</p>
+						</small>
+						<pre><code data-trim data-noescape>
+							# index.html.rb
+							&lt;h1>Tweets&lt;/h1>
+							<%= turbo_stream_from "tweets" %>
+
+							&lt;h2 class="mt-3 h4 text-muted">New Tweet&lt;/h2>
+							&lt;div class="card card-body">
+							  <%= turbo_frame_tag "new-tweet", src: new_tweet_path, target: "_top" %>
+							&lt;/div>
+
+							&lt;h2 class="mt-3 h4 text-muted">Tweet Feed&lt;/h2>
+							<%= turbo_frame_tag "tweets" do %>
+							  <%= render @tweets %>
+							<% end %>
+						</code></pre>
+					</section>
+					<section>
+						<small>
+							<p>
+								However, now we need to identify where this lazy loaded data goes -- inside the new view.<br>
+								Now new.html.erb would look like:
+							</p>
+						</small>
+						<pre><code data-trim data-noescape>
+							# new.html.erb
+							<%= turbo_frame_tag "new-tweet" , target: "_top" do %>
+							  <%= render 'form' , tweet: @tweet %>
+							<% end %>
+						</code></pre>
+					</section>
+
+					<section>
+						<small>
+							<p>
+								It all works but the form doesn't clear after a create - a simple turbo_stream fix is to send a Tweet.new on create into the `new_form,`.
+								<br>Create.turbo_stream.erb template:
+							</p>
+						</small>
+						<pre><code data-trim data-noescape>
+							# create.turbo_stream.erb
+						  <%= turbo_stream.replace "new-tweet", partial: "tweets/form", locals: { tweet: Tweet.new } %>
+						</code></pre>
 					</section>
 
 					<section>
@@ -887,15 +962,15 @@
 
 
 				<section>
-					<h3>EXTRA: Mini-Notes</h3>
+					<h3>EXTRA: Notes</h3>
 					<section>
 						<small>
 							<p>
-								have a link reach outside the turbo-frame
+								Links that also need to reach outside a frame can define that with: link reach outside the turbo-frame
 							</p>
 						</small>
 						<pre><code data-trim data-noescape>
-							<%= link_to 'back' , tweets_path, "data-turbo-frame" : "_top" %>
+							<%= link_to 'back', tweets_path, "data-turbo-frame" : "_top" %>
 						</code></pre>
 					</section>
 
